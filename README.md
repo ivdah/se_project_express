@@ -2,39 +2,36 @@
 
 The back-end project is focused on creating a server for the WTWR application. You’ll gain a deeper understanding of how to work with databases, set up security and testing, and deploy web applications on a remote machine. The eventual goal is to create a server with an API and user authorization.
 
-## Requirements
+## Project Description
 
-Node.js, npm, and a local MongoDB server are required. The application connects to the `wtwr_db` database at `mongodb://127.0.0.1:27017/wtwr_db`.
+WTWR (What to Wear?) is a backend REST API for a weather-based clothing application. The server currently provides user management functionality and stores user data in MongoDB. A frontend can use the API to retrieve all users, retrieve one user by ID, and create new users with a name and avatar URL.
 
-## Installation
+### Functionality
 
-Install the project dependencies from the repository root:
+- `GET /users` returns all users.
+- `GET /users/:userId` returns one user by MongoDB ID.
+- `POST /users` creates a user after validating the request data.
+- Invalid user data returns status `400` with a JSON `message`.
+- Invalid user IDs return status `400`, and valid IDs that do not match a user return status `404`.
+- Unexpected database errors return status `500` with a JSON `message`.
 
-```bash
-npm install
-```
+## Technologies and Techniques
+
+- **Node.js** provides the JavaScript runtime for the server.
+- **Express** handles HTTP requests, JSON parsing, routing, and response status codes.
+- **MongoDB** stores application data locally in the `wtwr_db` database.
+- **Mongoose** defines schemas, validates user data, and provides database queries.
+- **Validator** checks that avatar values are valid URLs.
+- The project uses a **controller and router structure**: routes map URLs to controller functions, while controllers contain request and database logic.
+- Database operations use **asynchronous Promise-based queries** with `.then()` and `.catch()`.
+- **Nodemon** automatically restarts the server during development.
+- **ESLint** checks the code for style and quality issues.
 
 ## Running the Project
 
-Start the server on port `3001`:
+`npm run start` — to launch the server
 
-```bash
-npm run start
-```
-
-For development with automatic reloads:
-
-```bash
-npm run dev
-```
-
-The API is available at `http://localhost:3001` by default. Set the `PORT` environment variable to use another port.
-
-## Linting
-
-```bash
-npm run lint
-```
+`npm run dev` — to launch the server with the hot reload feature
 
 ### Testing
 
