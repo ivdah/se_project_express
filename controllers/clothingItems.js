@@ -37,7 +37,7 @@ const deleteItem = (req, res) => {
 const likeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
-    { $addToSet: { likes: req.body.userId } },
+    { $addToSet: { likes: req.user._id } },
     { new: true, runValidators: true }
   )
     .orFail()
@@ -48,7 +48,7 @@ const likeItem = (req, res) => {
 const dislikeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
-    { $pull: { likes: req.body.userId } },
+    { $pull: { likes: req.user._id } },
     { new: true, runValidators: true }
   )
     .orFail()
