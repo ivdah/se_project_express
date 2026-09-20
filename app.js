@@ -5,14 +5,25 @@ const mainRouter = require("./routes/index");
 const app = express();
 const { PORT = 3001 } = process.env;
 
-mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db")
-.then(() => {
-  console.log("Connected to MongoDB");
-})
-.catch(console.error);
+mongoose
+  .connect("mongodb://127.0.0.1:27017/wtwr_db")
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch(console.error);
 
 app.use(express.json());
 app.use("/", mainRouter);
+
+app.use((req, res) => {
+  res.status(404).send({ message: "Requested resource not found" });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.name);
+  res.status(500).send({ message: "An error has occurred on the server." });
+  return next;
+});
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
