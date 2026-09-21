@@ -1,20 +1,6 @@
 const ClothingItem = require("../models/clothingItem");
-const { HTTP_STATUS } = require("../utiles/constants");
-const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require("../utils/errors");
-
-const sendError = (res, err) => {
-  console.error(err.name);
-  if (err.name === "ValidationError" || err.name === "CastError") {
-    return res.status(BAD_REQUEST).send({ message: err.message });
-  }
-  if (err.name === "DocumentNotFoundError") {
-    return res.status(NOT_FOUND).send({ message: err.message });
-  }
-
-  return res
-    .status(SERVER_ERROR)
-    .send({ message: "An error has occurred on the server." });
-};
+const { HTTP_STATUS } = require("../utils/errors");
+const sendError = require("../utils/sendError");
 
 const getItems = (req, res) => {
   ClothingItem.find({})

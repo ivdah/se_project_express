@@ -1,16 +1,12 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const mainRouter = require("./routes/index");
+const { HTTP_STATUS } = require("./utils/errors");
 
 const app = express();
 const { PORT = 3001 } = process.env;
 
-mongoose
-  .connect("mongodb://127.0.0.1:27017/wtwr_db")
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch(console.error);
+mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db").catch(console.error);
 
 app.use(express.json());
 app.use((req, res, next) => {
@@ -22,19 +18,17 @@ app.use((req, res, next) => {
 app.use("/", mainRouter);
 
 app.use((req, res) => {
-  res.status(404).send({ message: "Requested resource not found" });
+  res
+    .status(HTTP_STATUS.NOT_FOUND)
+    .send({ message: "Requested resource not found" });
 });
 
 app.use((err, req, res, next) => {
   console.error(err.name);
-  res.status(500).send({ message: "An error has occurred on the server." });
+  res
+    .status(HTTP_STATUS.SERVER_ERROR)
+    .send({ message: "An error has occurred on the server." });
   return next;
 });
 
-app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}`);
-});
-
-module.exports.createClothingItem = (req, res) => {
-  console.log(req.user._id); // _id will become accessible
-};
+app.listen(PORT);
