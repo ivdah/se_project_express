@@ -1,31 +1,72 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const { HTTP_STATUS } = require("../utils/errors");
+const { JWT_SECRET } = require("../utils/config");
 const sendError = require("../utils/sendError");
 
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(HTTP_STATUS.OK).send(users))
-    .catch((err) => sendError(res, err));
-};
-
 const createUser = (req, res) => {
-  const { name, avatar } = req.body;
+  const { email, password, name, avatar } = req.body;
 
-  User.create({ name, avatar })
-    .then((user) => res.status(HTTP_STATUS.CREATED).send(user))
+  bcrypt
+    .hash(password, 10)
+    .then((hashedPassword) =>
+      User.create({ email, password: hashedPassword, name, avatar })
+    )
+    .then((user) => {
+      const userData = user.toObject();
+      delete userData.password;
+      return res.status(HTTP_STATUS.CREATED).send(userData);
+    })
     .catch((err) => sendError(res, err));
 };
 
-const getUser = (req, res) => {
-  const { userId } = req.params;
-  User.findById(userId)
+const login = (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res
+      .status(HTTP_STATUS.BAD_REQUEST)
+      .send({ message: "Email and password are required" });
+  }
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      return res.status(HTTP_STATUS.OK).send({ token });
+    })
+    .catch((err) => sendError(res, err));
+};
+
+const getCurrentUser = (req, res) => {
+  User.findById(req.user._id)
+    .select("-password")
+    .orFail()
+    .then((user) => res.status(HTTP_STATUS.OK).send(user))
+    .catch((err) => sendError(res, err));
+};
+
+const updateCurrentUser = (req, res) => {
+  const updates = {};
+  ["name", "avatar"].forEach((field) => {
+    if (req.body[field] !== undefined) {
+      updates[field] = req.body[field];
+    }
+  });
+
+  User.findByIdAndUpdate(req.user._id, updates, {
+    new: true,
+    runValidators: true,
+  })
+    .select("-password")
     .orFail()
     .then((user) => res.status(HTTP_STATUS.OK).send(user))
     .catch((err) => sendError(res, err));
 };
 
 module.exports = {
-  getUsers,
   createUser,
-  getUser,
+  login,
+  getCurrentUser,
+  updateCurrentUser,
 };
