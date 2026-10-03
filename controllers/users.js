@@ -8,6 +8,17 @@ const sendError = require("../utils/sendError");
 const createUser = (req, res) => {
   const { email, password, name, avatar } = req.body;
 
+  if (
+    typeof email !== "string" ||
+    email.trim() === "" ||
+    typeof password !== "string" ||
+    password.length === 0
+  ) {
+    return res
+      .status(HTTP_STATUS.BAD_REQUEST)
+      .send({ message: "Invalid data" });
+  }
+
   bcrypt
     .hash(password, 10)
     .then((hashedPassword) =>
