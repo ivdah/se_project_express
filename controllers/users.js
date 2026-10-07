@@ -19,7 +19,7 @@ const createUser = (req, res) => {
       .send({ message: "Invalid data" });
   }
 
-  bcrypt
+  return bcrypt
     .hash(password, 10)
     .then((hashedPassword) =>
       User.create({ email, password: hashedPassword, name, avatar })
@@ -39,7 +39,7 @@ const login = (req, res) => {
       .status(HTTP_STATUS.BAD_REQUEST)
       .send({ message: "Email and password are required" });
   }
-  User.findUserByCredentials(email, password)
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
